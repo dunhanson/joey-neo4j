@@ -21,7 +21,7 @@ public class Neo4jUtils {
         //数据库配置
         try(InputStream in = Thread.currentThread()
                 .getContextClassLoader()
-                .getResourceAsStream("neo4j.properties")) {
+                .getResourceAsStream("joey-neo4j.properties")) {
 
             //加载配置
             Properties properties = new Properties();
