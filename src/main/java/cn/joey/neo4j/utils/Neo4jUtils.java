@@ -2,6 +2,9 @@ package cn.joey.neo4j.utils;
 
 import com.google.gson.Gson;
 import org.neo4j.driver.v1.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.InputStream;
 import java.net.URI;
 import java.util.*;
@@ -13,11 +16,16 @@ import java.util.*;
  */
 public class Neo4jUtils {
     private static Driver driver;
+    private static Logger logger = LoggerFactory.getLogger(Neo4jUtils.class);
 
     /**
      * 初始化
      */
     static {
+        init();
+    }
+
+    public static void init() {
         //数据库配置
         try(InputStream in = Thread.currentThread()
                 .getContextClassLoader()
@@ -46,6 +54,8 @@ public class Neo4jUtils {
                 driver = GraphDatabase.driver(routingUris.get(0), authToken, config);
             }
         } catch (Exception e) {
+            close();
+            logger.error("init fail");
             e.printStackTrace();
         }
     }
@@ -62,7 +72,6 @@ public class Neo4jUtils {
         List<T> list = new ArrayList<>();
         //Gson
         Gson gson = new Gson();
-
         //资源释放
         try(Session session = driver.session()) {
             StatementResult result = session.run(cypher);
@@ -84,6 +93,10 @@ public class Neo4jUtils {
                 //追加记录
                 list.add(gson.fromJson(gson.toJson(map), clazz));
             }
+        } catch (Exception e) {
+            close();
+            logger.error("run fail");
+            e.printStackTrace();
         }
         return list;
     }
@@ -92,7 +105,9 @@ public class Neo4jUtils {
      * 关闭资源
      */
     public static void close() {
-        driver.close();
+        if(driver != null) {
+            driver.close();
+        }
     }
 
 }
