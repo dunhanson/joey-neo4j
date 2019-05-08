@@ -49,8 +49,10 @@ public class Neo4jUtils {
             AuthToken authToken = AuthTokens.basic(user, password);
             Config config = Config.build().toConfig();
             if(routingUris.size() > 1) {
+                logger.info("load driver by cluster mode");
                 driver = GraphDatabase.routingDriver(routingUris, authToken, config);
             } else {
+                logger.info("load driver by single mode");
                 driver = GraphDatabase.driver(routingUris.get(0), authToken, config);
             }
         } catch (Exception e) {
@@ -61,6 +63,20 @@ public class Neo4jUtils {
     }
 
     /**
+     * 检测Driver是否正常
+     * @return
+     */
+    public static boolean isHealthDriver() {
+        try {
+            driver.isEncrypted();
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
+        return true;
+    }
+
+    /**
      * 查询返回记录
      * @param cypher
      * @param clazz
@@ -68,6 +84,10 @@ public class Neo4jUtils {
      * @return
      */
     public static <T> List<T> run(String cypher, Class<T> clazz) {
+        //驱动检测
+        if(!isHealthDriver()) {
+            init();
+        }
         //返回结果
         List<T> list = new ArrayList<>();
         //Gson
@@ -102,11 +122,28 @@ public class Neo4jUtils {
     }
 
     /**
+     * 查询返回记录(并关闭资源)
+     * @param cypher
+     * @param clazz
+     * @param <T>
+     * @return
+     */
+    public static <T> List<T> runAfterClose(String cypher, Class<T> clazz) {
+        List<T> list = run(cypher, clazz);
+        close();
+        return list;
+    }
+
+    /**
      * 关闭资源
      */
     public static void close() {
-        if(driver != null) {
-            driver.close();
+        try {
+            if(driver != null) {
+                driver.close();
+            }
+        }catch (Exception e) {
+            e.printStackTrace();
         }
     }
 
