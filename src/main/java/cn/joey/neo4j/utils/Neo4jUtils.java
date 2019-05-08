@@ -4,7 +4,6 @@ import com.google.gson.Gson;
 import org.neo4j.driver.v1.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import java.io.InputStream;
 import java.net.URI;
 import java.util.*;
@@ -66,14 +65,14 @@ public class Neo4jUtils {
      * 检测Driver是否正常
      * @return
      */
-    public static boolean isHealthDriver() {
+    public static boolean isClose() {
         try {
             driver.isEncrypted();
         } catch (Exception e) {
-            e.printStackTrace();
-            return false;
+            logger.info("driver is close");
+            return true;
         }
-        return true;
+        return false;
     }
 
     /**
@@ -85,7 +84,7 @@ public class Neo4jUtils {
      */
     public static <T> List<T> run(String cypher, Class<T> clazz) {
         //驱动检测
-        if(!isHealthDriver()) {
+        if(isClose()) {
             init();
         }
         //返回结果
@@ -143,7 +142,7 @@ public class Neo4jUtils {
                 driver.close();
             }
         }catch (Exception e) {
-            e.printStackTrace();
+            logger.info("close driver fail");
         }
     }
 
