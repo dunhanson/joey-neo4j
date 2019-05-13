@@ -1,6 +1,7 @@
 package cn.joey.neo4j.utils;
 
 import com.google.gson.Gson;
+import org.apache.commons.lang3.StringUtils;
 import org.neo4j.driver.v1.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -83,12 +84,22 @@ public class Neo4jUtils {
      * @return
      */
     public static <T> List<T> run(String cypher, Class<T> clazz) {
+        //返回结果
+        List<T> list = new ArrayList<>();
+        //Cypher检测
+        if(StringUtils.isBlank(cypher)) {
+            logger.error("cypher is null");
+            return list;
+        }
+        //Class检测
+        if(clazz == null) {
+            logger.error("Class is null");
+            return list;
+        }
         //驱动检测
         if(isClose()) {
             init();
         }
-        //返回结果
-        List<T> list = new ArrayList<>();
         //Gson
         Gson gson = new Gson();
         //资源释放
