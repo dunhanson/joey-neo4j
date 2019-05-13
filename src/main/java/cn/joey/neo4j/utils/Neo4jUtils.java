@@ -145,6 +145,32 @@ public class Neo4jUtils {
     }
 
     /**
+     * 查询返回StatementResult
+     * @param cypher
+     * @return
+     */
+    public static StatementResult run(String cypher) {
+        //Cypher检测
+        if(StringUtils.isBlank(cypher)) {
+            logger.error("cypher is null");
+            return null;
+        }
+        //驱动检测
+        if(isClose()) {
+            init();
+        }
+        //资源释放
+        try(Session session = driver.session()) {
+            return session.run(cypher);
+        } catch (Exception e) {
+            close();
+            logger.error("run fail");
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    /**
      * 关闭资源
      */
     public static void close() {
