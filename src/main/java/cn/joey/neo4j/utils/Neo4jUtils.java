@@ -1,5 +1,6 @@
 package cn.joey.neo4j.utils;
 
+import cn.joey.neo4j.constant.DefaultConstant;
 import com.google.gson.Gson;
 import org.apache.commons.lang3.StringUtils;
 import org.neo4j.driver.v1.*;
@@ -26,10 +27,14 @@ public class Neo4jUtils {
     }
 
     public static void init() {
+
+        //配置文件名称
+        String configFileName = CommonUtils.getConfigFileName();
+
         //数据库配置
         try(InputStream in = Thread.currentThread()
                 .getContextClassLoader()
-                .getResourceAsStream("joey-neo4j.properties")) {
+                .getResourceAsStream(configFileName)) {
 
             //加载配置
             Properties properties = new Properties();
