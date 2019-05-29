@@ -8,6 +8,8 @@
 /.settings
 /nb*
 /release.properties
+/classes
+/out
 /target
 
 # These are needed if running in IDE without properties set
