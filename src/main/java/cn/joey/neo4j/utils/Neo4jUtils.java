@@ -91,20 +91,24 @@ public class Neo4jUtils {
     public static <T> List<T> run(String cypher, Class<T> clazz) {
         //返回结果
         List<T> list = new ArrayList<>();
+
         //Cypher检测
         if(StringUtils.isBlank(cypher)) {
             logger.error("cypher is null");
             return list;
         }
+
         //Class检测
         if(clazz == null) {
             logger.error("Class is null");
             return list;
         }
+
         //驱动检测
         if(isClose()) {
             init();
         }
+
         //Gson
         Gson gson = new Gson();
         //资源释放
@@ -137,16 +141,37 @@ public class Neo4jUtils {
     }
 
     /**
-     * 查询返回记录(并关闭资源)
+     * 查询统计语句
      * @param cypher
-     * @param clazz
-     * @param <T>
      * @return
      */
-    public static <T> List<T> runAfterClose(String cypher, Class<T> clazz) {
-        List<T> list = run(cypher, clazz);
-        close();
-        return list;
+    public static int count(String cypher) {
+        //Cypher检测
+        if(StringUtils.isBlank(cypher)) {
+            logger.error("cypher is null");
+            return 0;
+        }
+
+        //驱动检测
+        if(isClose()) {
+            init();
+        }
+
+        //资源释放
+        try(Session session = driver.session()) {
+            StatementResult result = session.run(cypher);
+            while (result.hasNext()) {
+                //Map对象
+                Map<String, Object> map = new HashMap<>();
+                //获取字段和值
+                return result.next().get(0).asInt();
+            }
+        } catch (Exception e) {
+            close();
+            logger.error("run fail");
+            e.printStackTrace();
+        }
+        return 0;
     }
 
     /**
